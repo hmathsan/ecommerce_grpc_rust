@@ -9,7 +9,6 @@ service CategoryService {
 
 message CreateCategoryRequest {
     string name = 1;
-    string parentCategoryId = 2;
 }
 
 message FindCategoryByIdRequest {
@@ -21,6 +20,6 @@ message CreateCategoryResponse {
 }
 
 message CategoryResponse {
-    string name = 1;
-    string parentCategoryId = 2;
+    string id = 1;
+    string name = 2;
 }

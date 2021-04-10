@@ -8,6 +8,8 @@ pub trait Repository {
     async fn find_all() -> Result<Self, Error> where Self: Sized;
 
     async fn find_by_id(id: &str) -> Result<Self, Error> where Self: Sized;
+
+    async fn save(&self) -> Result<(), Error>;
 }
 
 impl Db {
@@ -40,7 +42,7 @@ impl Db {
 
         let _category = client
             .query("CREATE TABLE IF NOT EXISTS ecommerce.category (
-                id uuid NOT NULL,
+                id VARCHAR NOT NULL,
                 name VARCHAR NOT NULL,
                 PRIMARY KEY (id)
             );", &[]).await?;

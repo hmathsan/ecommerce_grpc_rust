@@ -4,20 +4,51 @@ use super::repository::Repository;
 use super::repository::Db;
 
 pub struct Category {
-    id: String,
-    name: String,
-    parent_category_id: String
+    pub id: String,
+    pub name: String,
 }
 
 #[async_trait]
 impl Repository for Category {
     async fn find_all() -> Result<Self, Error> {
-        Db::db_connect().await?;
+        let db = Db::db_connect().await?;
         unimplemented!()
     }
 
     async fn find_by_id(id: &str) -> Result<Self, Error> {
-        Db::db_connect().await?;
+        let db = Db::db_connect().await?;
         unimplemented!()
+    }
+
+    async fn save(&self) -> Result<(), Error> {
+        println!("Connecting to database.");
+        let db = Db::db_connect().await?;
+
+        println!("Trying to save to database.");
+        db.query("INSERT INTO ecommerce.category (id, name) VALUES ($1, $2)", &[&self.id, &self.name]).await?;
+
+        println!("Category saved successfully.");
+        Ok(())
+    }
+}
+
+impl Category {
+    pub fn new(id: String, name: String) -> Self {
+        let converted_name = String::from(name);
+        Category { id, name: converted_name }
+    }
+
+    pub async fn find_by_name(name: String) -> Result<Option<Self>, Error> {
+        let db = Db::db_connect().await?;
+
+        let category = db.query("SELECT * FROM ecommerce.category WHERE NAME = $1", &[&name]).await?;
+        if &category.len() <= &0 {
+            return Ok(None)
+        };
+
+        let id: String = category[0].get(0);
+        let cat_name: String = category[0].get(1);
+
+        Ok(Some(Category { id, name: cat_name }))
     }
 }
