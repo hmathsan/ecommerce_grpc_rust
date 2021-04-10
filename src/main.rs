@@ -4,6 +4,7 @@ use server::EcommerceServer;
 
 mod server;
 mod services;
+mod repositories;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

@@ -1,7 +1,7 @@
 use std::net::SocketAddr;
 
 use tonic::transport::Server;
-use crate::services::{MyGreeter};
+use crate::services::{MyGreeter, CategoryEndpoint};
 
 pub struct EcommerceServer {
     addr: SocketAddr
@@ -18,6 +18,7 @@ impl EcommerceServer {
     
         Server::builder()
             .add_service(MyGreeter::rtn_service())
+            .add_service(CategoryEndpoint::rtn_service())
             .serve(self.addr)
             .await?;
     

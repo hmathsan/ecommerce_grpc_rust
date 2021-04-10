@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package category;
+
+service CategoryService {
+    rpc CreateCategory (CreateCategoryRequest) returns (CreateCategoryResponse) {}
+    rpc FindCategoryById (FindCategoryByIdRequest) returns (CategoryResponse) {}
+}
+
+message CreateCategoryRequest {
+    string name = 1;
+    string parentCategoryId = 2;
+}
+
+message FindCategoryByIdRequest {
+    string id = 1;
+}
+
+message CreateCategoryResponse {
+    CategoryResponse createdCategory = 1;
+}
+
+message CategoryResponse {
+    string name = 1;
+    string parentCategoryId = 2;
+}
