@@ -1,4 +1,5 @@
 use std::env;
+use repositories::Db;
 
 use server::EcommerceServer;
 
@@ -8,10 +9,14 @@ mod repositories;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("Starting server");
+    println!("Starting server\r\n");
 
     let default_addr = "127.0.0.1";
     let default_port = "50051";
+
+    println!("Checking for database configuration.");
+
+    Db::check_tables().await?;
 
     println!("Checking address variable.");
 

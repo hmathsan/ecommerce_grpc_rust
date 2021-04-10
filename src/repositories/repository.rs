@@ -13,7 +13,7 @@ pub trait Repository {
 impl Db {
     pub async fn db_connect() -> Result<Client, Error> {
         let (client, connection) =
-            tokio_postgres::connect("host=localhost user=postgres", NoTls).await?;
+            tokio_postgres::connect("host=localhost user=postgres password=password dbname=ecommerce", NoTls).await?;
 
         tokio::spawn(async move {
             if let Err(e) = connection.await {
@@ -22,5 +22,30 @@ impl Db {
         });
 
         Ok(client)
+    }
+
+    pub async fn check_tables() -> Result<(), Error> {
+        println!("Connecting to database.");
+
+        let (client, connection) =
+            tokio_postgres::connect("host=localhost user=postgres password=password dbname=ecommerce", NoTls).await?;
+
+        tokio::spawn(async move {
+            if let Err(e) = connection.await {
+                eprint!("connection error: {}", e);
+            }
+        });
+
+        println!("Checking if category table exists.");
+
+        let _category = client
+            .query("CREATE TABLE IF NOT EXISTS ecommerce.category (
+                id uuid NOT NULL,
+                name VARCHAR NOT NULL,
+                PRIMARY KEY (id)
+            );", &[]).await?;
+
+        println!("Database configuration complete.\r\n");
+        Ok(())
     }
 }
