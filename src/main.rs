@@ -1,45 +1,27 @@
-use tonic::{transport::Server, Request, Response, Status};
+use std::env;
 
-use hello_world::greeter_server::{Greeter, GreeterServer};
-use hello_world::{HelloRequest, HelloResponse};
+use server::EcommerceServer;
 
-pub mod hello_world {
-    include!(concat!(env!("OUT_DIR"), "\\helloworld.rs"));
-}
-
-#[derive(Debug, Default)]
-pub struct MyGreeter {}
-
-#[tonic::async_trait]
-impl Greeter for MyGreeter {
-    async fn say_hello(&self, request: Request<HelloRequest>) -> Result<Response<HelloResponse>, Status> {
-        println!("Got a request: {:?}", request);
-
-        let reply = HelloResponse{
-            message: format!("Hello {}!", request.into_inner().name).into()
-        };
-
-        Ok(Response::new(reply))
-    }
-}
+mod server;
+mod services;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    run_server().await?;
+    println!("Starting server");
 
-    Ok(())
-}
+    let default_addr = "127.0.0.1";
+    let default_port = "50051";
 
-async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = "127.0.0.1:50051".parse()?;
-    let greeter = MyGreeter::default();
+    println!("Checking address variable.");
 
-    println!("Listening to address: {}", addr);
+    let server_ip = env::var("SERVER_IP_ADDR").unwrap_or(String::from(default_addr));
+    let server_port = env::var("SERVER_PORT").unwrap_or(String::from(default_port));
+    let addr = format!("{}:{}", server_ip, server_port);
 
-    Server::builder()
-        .add_service(GreeterServer::new(greeter))
-        .serve(addr)
-        .await?;
+    println!("Starting server on address {}", addr);
+
+    let server = EcommerceServer::new(addr);
+    server.run_server().await?;
 
     Ok(())
 }
