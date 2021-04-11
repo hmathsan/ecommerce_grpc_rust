@@ -1,5 +1,8 @@
+use std::vec::Vec as Vector;
+
 use tonic::{Request, Response, Status, Code};
-use category::{CategoryResponse, FindCategoryByIdRequest, CreateCategoryRequest, CreateCategoryResponse};
+use category::{CategoryResponse, FindCategoryByIdRequest, CreateCategoryRequest, CreateCategoryResponse, 
+    FindAllCategoriesRequest, FindAllCategoriesResponse};
 use category::category_service_server::{CategoryService, CategoryServiceServer};
 
 use crate::repositories::{category_repository::Category, repository::Repository};
@@ -30,7 +33,7 @@ impl CategoryService for CategoryEndpoint {
         };
 
         println!("Saving new Category to database.");
-        if let Err(e) = new_category.save().await.or(Err(Status::new(Code::Internal, "Error savind to database."))) {
+        if let Err(e) = new_category.save().await {
             println!("An error ocurred while trying to save to database: {:?}", e);
             return Err(Status::new(Code::Internal, format!("A error ocurred while saving to database: {:?}", e)))
         }
@@ -47,6 +50,27 @@ impl CategoryService for CategoryEndpoint {
 
     async fn find_category_by_id(&self, request:Request<FindCategoryByIdRequest>) -> Result<Response<CategoryResponse>, Status> {
         unimplemented!()
+    }
+
+    async fn find_all_categories(&self, _request:Request<FindAllCategoriesRequest>) -> Result<Response<FindAllCategoriesResponse>, Status> {
+        println!("Request received to find all Categories.");
+        let mut categories = Vector::new();
+        
+        match Category::find_all().await {
+            Ok(cats) => {
+                println!("Categories found. Building response array.");
+                for cat in cats {
+                    categories.push(CategoryResponse{ id: cat.id, name: cat.name });
+                }
+            },
+            Err(err) => {
+                println!("An error ocurred while searching for all Categories: {:?}", err);
+                return Err(Status::new(Code::Internal, format!("Error while getting all categories: {}", err)))
+            }
+        };
+
+        println!("Returning response. Request completed successfully.\r\n");
+        Ok(Response::new(FindAllCategoriesResponse{ categories }))
     }
 }
 

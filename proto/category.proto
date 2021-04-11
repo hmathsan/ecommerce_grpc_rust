@@ -5,6 +5,7 @@ package category;
 service CategoryService {
     rpc CreateCategory (CreateCategoryRequest) returns (CreateCategoryResponse) {}
     rpc FindCategoryById (FindCategoryByIdRequest) returns (CategoryResponse) {}
+    rpc FindAllCategories (FindAllCategoriesRequest) returns (FindAllCategoriesResponse) {}
 }
 
 message CreateCategoryRequest {
@@ -17,6 +18,12 @@ message FindCategoryByIdRequest {
 
 message CreateCategoryResponse {
     CategoryResponse createdCategory = 1;
+}
+
+message FindAllCategoriesRequest {}
+
+message FindAllCategoriesResponse {
+    repeated CategoryResponse categories = 1;
 }
 
 message CategoryResponse {

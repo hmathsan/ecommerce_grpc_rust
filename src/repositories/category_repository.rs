@@ -10,9 +10,22 @@ pub struct Category {
 
 #[async_trait]
 impl Repository for Category {
-    async fn find_all() -> Result<Self, Error> {
+    async fn find_all() -> Result<Vec<Self>, Error> {
+        println!("Connecting to database to find all Categories.");
         let db = Db::db_connect().await?;
-        unimplemented!()
+
+        let found_categories = db.query("SELECT * FROM ecommerce.category", &[]).await?;
+
+        let mut category_array = Vec::new();
+
+        for cat in found_categories {
+            let id = cat.get(0);
+            let name = cat.get(1);
+            category_array.push(Category{ id, name });
+        }
+
+        println!("A total of {} Categories were found.", &category_array.len());
+        Ok(category_array)
     }
 
     async fn find_by_id(id: &str) -> Result<Self, Error> {
