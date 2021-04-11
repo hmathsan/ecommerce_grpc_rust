@@ -28,9 +28,20 @@ impl Repository for Category {
         Ok(category_array)
     }
 
-    async fn find_by_id(id: &str) -> Result<Self, Error> {
+    async fn find_by_id(id: String) -> Result<Option<Self>, Error> {
+        println!("Connecting to database to find Category by id.");
         let db = Db::db_connect().await?;
-        unimplemented!()
+
+        let found_category = db.query("SELECT * FROM ecommerce.category WHERE ID = $1", &[&id]).await?;
+
+        if &found_category.len() <= &0 {
+            return Ok(None)
+        }
+
+        let cat_id: String = found_category[0].get(0);
+        let cat_name: String = found_category[0].get(1);
+
+        Ok(Some(Category{ id: cat_id, name: cat_name }))
     }
 
     async fn save(&self) -> Result<(), Error> {

@@ -7,7 +7,7 @@ pub struct Db {}
 pub trait Repository {
     async fn find_all() -> Result<Vec<Self>, Error> where Self: Sized;
 
-    async fn find_by_id(id: &str) -> Result<Self, Error> where Self: Sized;
+    async fn find_by_id(id: String) -> Result<Option<Self>, Error> where Self: Sized;
 
     async fn save(&self) -> Result<(), Error>;
 }

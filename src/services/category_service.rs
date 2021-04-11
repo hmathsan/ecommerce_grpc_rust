@@ -49,7 +49,28 @@ impl CategoryService for CategoryEndpoint {
     }
 
     async fn find_category_by_id(&self, request:Request<FindCategoryByIdRequest>) -> Result<Response<CategoryResponse>, Status> {
-        unimplemented!()
+        println!("Request received to find Category by id");
+        let request_id = request.into_inner().id;
+        match Category::find_by_id(String::from(&request_id)).await {
+            Ok(cat) => {
+                match cat {
+                    Some(c) => {
+                        let id = c.id;
+                        let name = c.name;
+                        println!("Category of id {} found. Returning response.\r\nRequest completed successfully.\r\n", &request_id);
+                        return Ok(Response::new(CategoryResponse{ id, name }));
+                    },
+                    None => {
+                        println!("No Category of id {} were found.\r\n", &request_id);
+                        return Err(Status::new(Code::NotFound, format!("No Category of id {} were found.", &request_id)))
+                    }
+                }
+            },
+            Err(err) => {
+                println!("An unexpected error ocurred while finding category by id.\r\n");
+                return Err(Status::new(Code::Internal, format!("An unexpected error ocurred while finding Category by id: {}", err)))
+            }
+        }
     }
 
     async fn find_all_categories(&self, _request:Request<FindAllCategoriesRequest>) -> Result<Response<FindAllCategoriesResponse>, Status> {
