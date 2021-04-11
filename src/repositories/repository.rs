@@ -9,6 +9,8 @@ pub trait Repository {
 
     async fn find_by_id(id: String) -> Result<Option<Self>, Error> where Self: Sized;
 
+    async fn find_by_name(name: String) -> Result<Option<Self>, Error> where Self: Sized;
+
     async fn save(&self) -> Result<(), Error>;
 }
 

@@ -1,7 +1,6 @@
 use async_trait::async_trait;
 use tokio_postgres::Error;
-use super::repository::Repository;
-use super::repository::Db;
+use super::repository::{Repository, Db};
 
 pub struct Category {
     pub id: String,
@@ -43,6 +42,20 @@ impl Repository for Category {
 
         Ok(Some(Category{ id: cat_id, name: cat_name }))
     }
+    
+    async fn find_by_name(name: String) -> Result<Option<Self>, Error> {
+        let db = Db::db_connect().await?;
+
+        let category = db.query("SELECT * FROM ecommerce.category WHERE NAME = $1", &[&name]).await?;
+        if &category.len() <= &0 {
+            return Ok(None)
+        };
+
+        let id: String = category[0].get(0);
+        let cat_name: String = category[0].get(1);
+
+        Ok(Some(Category { id, name: cat_name }))
+    }
 
     async fn save(&self) -> Result<(), Error> {
         println!("Connecting to database.");
@@ -60,19 +73,5 @@ impl Category {
     pub fn new(id: String, name: String) -> Self {
         let converted_name = String::from(name);
         Category { id, name: converted_name }
-    }
-
-    pub async fn find_by_name(name: String) -> Result<Option<Self>, Error> {
-        let db = Db::db_connect().await?;
-
-        let category = db.query("SELECT * FROM ecommerce.category WHERE NAME = $1", &[&name]).await?;
-        if &category.len() <= &0 {
-            return Ok(None)
-        };
-
-        let id: String = category[0].get(0);
-        let cat_name: String = category[0].get(1);
-
-        Ok(Some(Category { id, name: cat_name }))
     }
 }

@@ -1,12 +1,9 @@
-use std::vec::Vec as Vector;
-
 use tonic::{Request, Response, Status, Code};
 use category::{CategoryResponse, FindCategoryByIdRequest, CreateCategoryRequest, CreateCategoryResponse, 
     FindAllCategoriesRequest, FindAllCategoriesResponse};
 use category::category_service_server::{CategoryService, CategoryServiceServer};
 
 use crate::repositories::{category_repository::Category, repository::Repository};
-
 
 use uuid::Uuid;
 
@@ -75,7 +72,7 @@ impl CategoryService for CategoryEndpoint {
 
     async fn find_all_categories(&self, _request:Request<FindAllCategoriesRequest>) -> Result<Response<FindAllCategoriesResponse>, Status> {
         println!("Request received to find all Categories.");
-        let mut categories = Vector::new();
+        let mut categories = Vec::new();
         
         match Category::find_all().await {
             Ok(cats) => {
