@@ -49,6 +49,19 @@ impl Db {
                 PRIMARY KEY (id)
             );", &[]).await?;
 
+        println!("Checking if product table exists.");
+
+        let _product = client
+            .query("CREATE TABLE IF NOT EXISTS ecommerce.product (
+                id VARCHAR NOT NULL,
+                  name VARCHAR NOT NULL,
+                  price FLOAT(53) NOT NULL,
+                  quantity_in_stock INT NOT NULL,
+                  description VARCHAR NOT NULL,
+                  category_id VARCHAR NOT NULL REFERENCES ecommerce.category(id),
+                  PRIMARY KEY (id)
+            );", &[]).await?;
+
         println!("Database configuration complete.\r\n");
         Ok(())
     }
