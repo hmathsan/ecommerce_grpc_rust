@@ -90,7 +90,67 @@ impl ProductService for ProductEndpoint {
     }
 
     async fn get_product_by_id(&self, request: Request<GetProductByIdRequest>) -> Result<Response<ProductResponse>, Status> {
-        unimplemented!()
+        println!("Receiving request to find Product by id.");
+        let request_id = request.into_inner().id;
+
+        println!("Trying to find Product.");
+        match Product::find_by_id(String::from(&request_id)).await {
+            Ok(possible_product) => {
+                match possible_product {
+                    Some(product) => {
+                        println!("Product with id {} found.", &request_id);
+                        let category: Category;
+
+                        println!("Getting Category information.");
+                        match Category::find_by_id(String::from(&product.category_id)).await {
+                            Ok(possible_cat) => {
+                                match possible_cat {
+                                    Some(cat) => {
+                                        println!("Category with id {} found.", String::from(String::from(&product.category_id)));
+                                        category = cat;
+                                    },
+                                    None => {
+                                        println!("No Category with id {} found.\r\n", String::from(String::from(&product.category_id)));
+                                        return Err(Status::new(Code::NotFound, 
+                                            format!("No Category with name {} found.", String::from(&product.category_id))))
+                                    }
+                                }
+                            }, 
+                            Err(err) => {
+                                println!("Unexpected error while searching for category id: {:?}\r\n", err);
+                                return Err(Status::new(Code::Internal, 
+                                    format!("Unexpected error while searching for category name: {}", err)))
+                            }
+                        }
+
+                        println!("Building response struct.");
+                        let response = ProductResponse {
+                            id: product.id,
+                            name: product.name,
+                            price: product.price,
+                            quantity_in_stock: product.quantity_in_stock as i32,
+                            description: product.description,
+                            category: Some(CategoryResponse{
+                                id: category.id,
+                                name: category.name
+                            })
+                        };
+
+                        println!("Returning response. Request completed successfully.\r\n");
+                        return Ok(Response::new(response))
+                    },
+                    None => {
+                        println!("No Product with id {} were found.\r\n", &request_id);
+                        return Err(Status::new(Code::NotFound, format!("No Product with id {} were found.", &request_id)))
+                    }
+                }
+            },
+            Err(err) => {
+                println!("Unexpected error ocurred while finding Product by id: {:?}\r\n", err);
+                return Err(Status::new(Code::Internal, 
+                    format!("Unexpected error ocurred while finding Product by id: {:?}", err)))
+            }
+        }
     }
 }
 

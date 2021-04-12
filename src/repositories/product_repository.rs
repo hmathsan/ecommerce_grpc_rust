@@ -18,7 +18,24 @@ impl Repository for Product {
     }
 
     async fn find_by_id(id: String) -> Result<Option<Self>, Error> {
-        unimplemented!()
+        println!("Connecting to database to find Product by id.");
+        let db = Db::db_connect().await?;
+
+        println!("Trying to find Product.");
+        let found_product = db.query("SELECT * FROM ecommerce.product WHERE ID = $1", &[&id]).await?;
+
+        if &found_product.len() <= &0 {
+            return Ok(None)
+        }
+
+        let id: String = found_product[0].get(0);
+        let name: String = found_product[0].get(1);
+        let price: f64 = found_product[0].get(2);
+        let quantity: i32 = found_product[0].get(3);
+        let description: String = found_product[0].get(4);
+        let category_id: String = found_product[0].get(5);
+
+        Ok(Some(Product{ id, name, price, quantity_in_stock: quantity as u32, description, category_id }))
     }
 
     async fn save(&self) -> Result<(), Error> {
